@@ -11,8 +11,12 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.chatFrontend.form.ChatWindow;
+import org.chatFrontend.singleton.ObjectMapperSingleton;
 import org.json.JSONObject;
 
 public class SSEFrontend {
@@ -20,7 +24,7 @@ public class SSEFrontend {
     private String username;
     private String serverUrl = "http://localhost:8088/user/";
     private ChatWindow chatWindow;
-
+    ObjectMapper objectMapper = ObjectMapperSingleton.getInstance();
     public SSEFrontend(String username, ChatWindow chatWindow) {
         this.username = username;
         this.chatWindow = chatWindow;
@@ -37,8 +41,11 @@ public class SSEFrontend {
             BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
             String line;
             while ((line = reader.readLine()) != null) {
+                System.out.println(line+"\n");
                 if (!line.isEmpty() && line.startsWith("data:")) {
+
                     handleEvent(line.substring(5).trim());
+                    Thread.sleep(100);
                 }
             }
         } catch (Exception e) {
@@ -46,14 +53,27 @@ public class SSEFrontend {
         }
     }
 
-    private void handleEvent(String event) {
+    private void handleEvent(String event) throws JsonProcessingException {
         JSONObject jsonObject = new JSONObject(event);
         String eventType = jsonObject.getString("eventType");
-        if ("newMessage".equals(eventType)) {
-            String from = jsonObject.getString("from");
-            String message = jsonObject.getString("message");
-            chatWindow.addUserToList(from);
-            chatWindow.appendToChatBox(from + ": " + message);
+        String message = jsonObject.getString("message");
+        String from = jsonObject.getString("from");
+        switch (eventType.toString()){
+            case "usersList":
+                Set<String> usernames = objectMapper.readValue(message, objectMapper.getTypeFactory().constructCollectionType(Set.class, String.class));
+                chatWindow.addUserToList(usernames);
+                break;
+            case "newMessage":
+                chatWindow.appendToChatBox(from + ": " + message);
+                break;
+            case "userDelete":
+                chatWindow.removeUserFromList(Set.of(from));
+                break;
+            case "userCreate":
+                chatWindow.addUserToList(Set.of(from));
+                break;
+            default:
+                break;
         }
     }
 }
