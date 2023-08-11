@@ -8,6 +8,7 @@
         <outputRelativeToContentRoot value="true" />
         <module name="SSE_GUI" />
         <module name="ChatFrontend" />
+        <module name="Chat_GUI" />
       </profile>
     </annotationProcessing>
   </component>

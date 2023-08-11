@@ -1,16 +1,11 @@
 package org.chatFrontend.sse;
 
 // SSEFrontend.java
-import javax.swing.*;
-import java.awt.*;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.List;
 import java.util.Set;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -60,8 +55,15 @@ public class SSEFrontend {
         String from = jsonObject.getString("from");
         switch (eventType.toString()){
             case "usersList":
-                Set<String> usernames = objectMapper.readValue(message, objectMapper.getTypeFactory().constructCollectionType(Set.class, String.class));
-                chatWindow.addUserToList(usernames);
+                System.out.println(message);
+                UserGroupData data = objectMapper.readValue(message, UserGroupData.class);
+                Set<String> userList = data.getUsers();
+                Set<String> groupList = data.getGroups();
+                System.out.println(userList);
+                System.out.println(groupList);
+                chatWindow.addUserToList(userList);
+                chatWindow.addGroupToList(groupList);
+
                 break;
             case "newMessage":
                 chatWindow.appendToChatBox(from + ": " + message);
@@ -76,4 +78,26 @@ public class SSEFrontend {
                 break;
         }
     }
+
+    static class UserGroupData {
+        private Set<String> users;
+        private Set<String> groups;
+
+        public Set<String> getUsers() {
+            return users;
+        }
+
+        public void setUsers(Set<String> users) {
+            this.users = users;
+        }
+
+        public Set<String> getGroups() {
+            return groups;
+        }
+
+        public void setGroups(Set<String> groups) {
+            this.groups = groups;
+        }
+    }
 }
+

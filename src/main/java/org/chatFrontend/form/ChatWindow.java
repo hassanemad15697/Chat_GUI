@@ -109,22 +109,6 @@ public class ChatWindow {
         }
 
 
-        Group group1 = new Group("Group 1");
-        Group group2 = new Group("Group 2");
-        groups.put(group1.getGroupName(), group1);
-        groups.put(group2.getGroupName(), group2);
-
-        // Sample messages
-        Message msg1 = new Message(System.currentTimeMillis(), "User 1", "Group 1", "Sample message 1 from User 1");
-        Message msg2 = new Message(System.currentTimeMillis(), "User 2", "Group 1", "Sample message 2 from User 2");
-        group1.getMessage().add(msg1);
-        group1.getMessage().add(msg2);
-
-        Message msg3 = new Message(System.currentTimeMillis(), "User 3", "Group 2", "Sample message 1 from User 3");
-        Message msg4 = new Message(System.currentTimeMillis(), "User 4", "Group 2", "Sample message 2 from User 4");
-        group2.getMessage().add(msg3);
-        group2.getMessage().add(msg4);
-
         JFrame frame = new JFrame("Chat Window");
         frame.setSize(800, 600);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -156,8 +140,6 @@ public class ChatWindow {
 
         // 2. Side panel for groups
         groupListModel = new DefaultListModel<>();
-        groupListModel.addElement(group1.getGroupName());
-        groupListModel.addElement(group2.getGroupName());
         groupList = new JList<>(groupListModel);
         groupList.addMouseListener(new MouseAdapter() {
             @Override
@@ -190,6 +172,16 @@ public class ChatWindow {
         });
         updateUserListModel();
     }
+    public void addGroupToList(Set<String> groupList) {
+        groupList.forEach(group -> {
+            if (!groups.containsKey(group)) {
+                System.out.println(group+"added");
+                groups.put(group, new Group(group));
+            }
+        });
+        updateGroupListModel();
+    }
+
 
     public void removeUserFromList(Set<String> usernames) {
         usernames.forEach(username -> {
@@ -209,10 +201,19 @@ public class ChatWindow {
             }
         });
     }
+    private void updateGroupListModel() {
+        groupListModel.removeAllElements();
+        groups.forEach((s, user) -> {
+            if(!groupListModel.contains(s)){
+                groupListModel.addElement(s);
+            }
+        });
+    }
 
     public void appendToChatBox(String message) {
         chatBox.append("\n" + message);
     }
+
 
 
 }

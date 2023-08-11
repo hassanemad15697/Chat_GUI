@@ -8,7 +8,7 @@ public class Main {
 
     public static void main(String[] args) {
         ChatWindow chatWindow = new ChatWindow();
-        SSEFrontend frontend = new SSEFrontend("GUI", chatWindow);
+        SSEFrontend frontend = new SSEFrontend("GUI1", chatWindow);
         frontend.connect();
     }
 }
